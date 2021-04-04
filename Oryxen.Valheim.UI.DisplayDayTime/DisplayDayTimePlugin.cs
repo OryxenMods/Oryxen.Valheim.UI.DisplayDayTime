@@ -2,13 +2,14 @@
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Oryxen.Valheim.UI.DisplayDayTime
 {
-    [BepInPlugin(ID, "Display Day & Time in HUD", "1.0.0")]
+    [BepInPlugin(ID, "Display Day & Time in HUD", "1.1.0")]
     [BepInProcess("valheim.exe")]
     public class DisplayDayTimePlugin : BaseUnityPlugin
     {
@@ -16,12 +17,17 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 
         #region BepInEx configs
         private static ConfigEntry<bool> _displayUnderMiniMap;
-        private static ConfigEntry<bool> _displayTime;
         private static ConfigEntry<bool> _displayDay;
+        private static ConfigEntry<bool> _displayTime;
+        private static ConfigEntry<bool> _displayBackground;
         private static ConfigEntry<bool> _twentyFourHourClock;
-
-        private const int FONT_SIZE = 18;
+        private static ConfigEntry<int> _fontSize;
+        private static ConfigEntry<string> _fontName;
+        private static ConfigEntry<Color> _fontColor;
+        private static ConfigEntry<Color> _backgroundColor;
         #endregion
+
+        private const string DEFAULT_FONT = "AveriaSansLibre-Bold";
 
         #region Unity game objects & components
         private static GameObject _panel;
@@ -35,9 +41,14 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
         {
             //Bind BepInEx configs
             _displayUnderMiniMap = Config.Bind("General", "Display under minimap", false, "Display under minimap");
-            _displayTime = Config.Bind("General", "Display time", true, "Display time");
             _displayDay = Config.Bind("General", "Display day", true, "Display day");
+            _displayTime = Config.Bind("General", "Display time", true, "Display time");
+            _displayBackground = Config.Bind("General", "Display background", false, "Display background");
             _twentyFourHourClock = Config.Bind("General", "24-hour clock", true, "24-hour clock");
+            _fontSize = Config.Bind("General", "Font size", 16, "Font size");
+            _fontName = Config.Bind("General", "Font name", DEFAULT_FONT, "Font name");
+            _fontColor = Config.Bind("General", "Font color", new Color(1, 1, 1, 0.791f), "Font color");
+            _backgroundColor = Config.Bind("General", "Background color", new Color(0, 0, 0, 0.3921569f), "Background color");
 
             //Apply patches
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), ID);
@@ -66,7 +77,10 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 			}
 
             var rect = _panel.GetComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(-185, _displayUnderMiniMap.Value ? -255 : -20);
+            rect.anchoredPosition = new Vector2(-140, _displayUnderMiniMap.Value ? -255 : -25);
+            var image = _panel.GetComponent<Image>();
+            image.enabled = _displayBackground.Value;
+            image.color = _backgroundColor.Value;
 
             _dayText.enabled = _displayDay.Value;
             _timeText.enabled = _displayTime.Value;
@@ -98,19 +112,24 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             var rect = _panel.AddComponent<RectTransform>();
             rect.anchorMin = new Vector2(1, 1);
             rect.anchorMax = new Vector2(1, 1);
-            rect.anchoredPosition = new Vector2(-185, _displayUnderMiniMap.Value ? -255 : - 20);
+            rect.anchoredPosition = new Vector2(-140, _displayUnderMiniMap.Value ? -255 : - 25);
+            rect.sizeDelta = new Vector2(200, 30);
+
+            var image = _panel.AddComponent<Image>();
+            image.enabled = _displayBackground.Value;
+            image.color = _backgroundColor.Value;
 
             Log("Panel created!");
 
-            CreateDay(hudInstance.m_healthText.color, hudInstance.m_healthText.font);
-            CreateTime(hudInstance.m_healthText.color, hudInstance.m_healthText.font);
+            CreateDay();
+            CreateTime();
         }
 
         /// <summary>
         /// Creates a day game object to display the day in a text component aligned to the left.
         /// It also creates an outline around the text.
         /// </summary>
-        private static void CreateDay(Color color, Font font)
+        private static void CreateDay()
 		{
             Log("Creating day text...");
 
@@ -121,13 +140,14 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             day.transform.SetParent(_panel.transform);
 
             var rect = day.AddComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(0, 0);
+            rect.anchoredPosition = new Vector2(-46, 0);
+            rect.sizeDelta = new Vector2(90, 30);
             
             _dayText = day.AddComponent<Text>();
-            _dayText.color = color;
-            _dayText.font = font;
-            _dayText.fontSize = FONT_SIZE;
-            _dayText.enabled = true;
+            _dayText.color = _fontColor.Value;
+            _dayText.font = GetFont();
+            _dayText.fontSize = _fontSize.Value;
+            _dayText.enabled = _displayDay.Value;
             _dayText.alignment = TextAnchor.MiddleLeft;
 
             var outline = day.AddComponent<Outline>();
@@ -144,7 +164,7 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
         /// Creates a time game object to display the time in a text component aligned to the right.
         /// It also creates an outline around the text.
         /// </summary>
-        private static void CreateTime(Color color, Font font)
+        private static void CreateTime()
         {
             Log("Creating time text...");
 
@@ -156,13 +176,14 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             time.transform.SetParent(_panel.transform);
 
             var rect = time.AddComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(90, 0);
+            rect.anchoredPosition = new Vector2(46, 0);
+            rect.sizeDelta = new Vector2(90, 30);
 
             _timeText = time.AddComponent<Text>();
-            _timeText.color = color;
-            _timeText.font = font;
-            _timeText.fontSize = FONT_SIZE;
-            _timeText.enabled = true;
+            _timeText.color = _fontColor.Value;
+            _timeText.font = GetFont();
+            _timeText.fontSize = _fontSize.Value;
+            _timeText.enabled = _displayTime.Value;
             _timeText.alignment = TextAnchor.MiddleRight;
 
             var outline = time.AddComponent<Outline>();
@@ -177,17 +198,31 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 
         /// <summary>
         /// Updates text component with the current day.
+        /// It also updates the configured font, font size and color
         /// </summary>
         private void UpdateDay()
 		{
-			_dayText.text = GetCurrentDayText();
+            if (_dayText.font.name != _fontName.Value)
+            {
+                _dayText.font = GetFont();
+            }
+            _dayText.color = _fontColor.Value;
+            _dayText.fontSize = _fontSize.Value;
+            _dayText.text = GetCurrentDayText();
 		}
 
         /// <summary>
         /// Updates text component with the current time.
+        /// It also updates the configured font, font size and color
         /// </summary>
         private void UpdateTime()
         {
+            if (_timeText.font.name != _fontName.Value)
+			{
+                _timeText.font = GetFont();
+            }
+            _timeText.color = _fontColor.Value;
+            _timeText.fontSize = _fontSize.Value;
             _timeText.text = GetCurrentTimeText();
 		}
 
@@ -228,11 +263,28 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 		}
 
         /// <summary>
+        /// Get the configured font from resources.
+        /// </summary>
+        public static Font GetFont()
+		{
+            var fonts = Resources.FindObjectsOfTypeAll<Font>();
+
+            var font = fonts.FirstOrDefault(f => f.name == _fontName.Value);
+
+            if (font == null)
+            {
+                return fonts.FirstOrDefault(f => f.name == DEFAULT_FONT);
+            }
+
+            return font;
+        }
+
+        /// <summary>
         /// Log a message to the console.
         /// </summary>
         public static void Log(string message)
-		{
+        {
             Debug.Log($"{ID}: {message}");
-		}
-	}
+        }
+    }
 }
