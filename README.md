@@ -1,6 +1,6 @@
 # Valheim UI Mod - Display Day & Time in HUD
 
-Simple UI mod to display the day & time in the HUD above the minimap.
+Simple UI mod to display the in-game day & time in the HUD above the minimap.
 The panel game object with the day & time in it, is added as a child to the hudroot of the game, so it should only be visible when the HUD is visible.
 
 ## Requirements
@@ -39,8 +39,8 @@ Configuration settings you can change:
 5. Display background: set to "false" as default.
 6. Font name: set "AveriaSansLibre-Bold" as default.
 7. Font size: set to 16 as default.
-8. Font color: set to RGBA(1, 1, 1, 0.791f) as default.
-9. Background color: set to RGBA(0, 0, 0, 0.3921569f) as default.
+8. Font color: set to RGBA(1, 1, 1, 0.791) as default.
+9. Background color: set to RGBA(0, 0, 0, 0.3921569) as default.
 
 ## Links
 
