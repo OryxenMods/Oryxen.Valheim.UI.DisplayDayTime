@@ -37,7 +37,7 @@ Configuration settings you can change:
 3. Display day: set to "true" as default.
 4. 24-hour clock: set to "true" as default (if set to false, it will display the time in 12-hour notation).
 5. Display background: set to "true" as default.
-6. Font name: set "AveriaSansLibre-Bold" as default.
+6. Font name: set "AveriaSansLibre-Bold" as default, if font does not exist in resources "AveriaSansLibre-Bold" will be set.
 7. Font size: set to 16 as default.
 8. Font color: set to RGBA(1, 1, 1, 0.791) as default.
 9. Background color: set to RGBA(0, 0, 0, 0.3921569) as default.
