@@ -1,11 +1,19 @@
 # Valheim UI Mod - Display Day & Time in HUD
 
-Simple UI mod to display the day & time in the HUD above the minimap.
+Simple UI mod to display the in-game day & time in the HUD above the minimap.
 The panel game object with the day & time in it, is added as a child to the hudroot of the game, so it should only be visible when the HUD is visible.
 
 ## Requirements
 
 [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
+
+## Installation guide
+
+1. Download and install [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/).
+2. Download this mod from [Nexus Mods](https://www.nexusmods.com/valheim/mods/861) or from the the latest [release](https://github.com/OryxenMods/Oryxen.Valheim.UI.DisplayDayTime/releases), you can skip the next step if installed with Vortex.
+3. Move the file **Oryxen.Valheim.UI.DisplayDayTime.dll** into BepInEx\plugins (you can find this directory under your Valheim directory).
+4. Run the game!
+5. Optional: you can edit the configuration file under BepInEx\config\oryxen.valheim.ui.displaydaytime.cfg to change the settings to your liking.
 
 ## Build guide
 
@@ -28,14 +36,11 @@ Configuration settings you can change:
 2. Display time: set to "true" as default.
 3. Display day: set to "true" as default.
 4. 24-hour clock: set to "true" as default (if set to false, it will display the time in 12-hour notation).
-
-## Installation guide
-
-1. Download and install [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/).
-2. Download this mod from [Nexus Mods](https://www.nexusmods.com/valheim/mods/861) or from the the latest [release](https://github.com/OryxenMods/Oryxen.Valheim.UI.DisplayDayTime/releases), you can skip the next step if installed with Vortex.
-3. Move the file **Oryxen.Valheim.UI.DisplayDayTime.dll** into BepInEx\plugins (you can find this directory under your Valheim directory).
-4. Run the game!
-5. Optional: you can edit the configuration file under BepInEx\config\oryxen.valheim.ui.displaydaytime.cfg to change the settings to your liking.
+5. Display background: set to "false" as default.
+6. Font name: set "AveriaSansLibre-Bold" as default.
+7. Font size: set to 16 as default.
+8. Font color: set to RGBA(1, 1, 1, 0.791) as default.
+9. Background color: set to RGBA(0, 0, 0, 0.3921569) as default.
 
 ## Links
 
