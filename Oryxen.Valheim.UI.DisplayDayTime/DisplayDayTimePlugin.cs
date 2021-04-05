@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Oryxen.Valheim.UI.DisplayDayTime
 {
-    [BepInPlugin(ID, "Display Day & Time in HUD", "1.1.0")]
+    [BepInPlugin(ID, "Display Day & Time in HUD", "1.1.1")]
     [BepInProcess("valheim.exe")]
     public class DisplayDayTimePlugin : BaseUnityPlugin
     {
