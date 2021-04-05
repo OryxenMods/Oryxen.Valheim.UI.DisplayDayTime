@@ -24,7 +24,14 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
         private static ConfigEntry<int> _fontSize;
         private static ConfigEntry<string> _fontName;
         private static ConfigEntry<Color> _fontColor;
+        private static ConfigEntry<bool> _textOutlineEnabled;
+        private static ConfigEntry<Color> _textOutlineColor;
         private static ConfigEntry<Color> _backgroundColor;
+        private static ConfigEntry<float> _marginBetweenMiniMap;
+        private static ConfigEntry<float> _padding;
+        private static ConfigEntry<bool> _reverseTextPositions;
+        private static ConfigEntry<float> _panelWidth;
+        private static ConfigEntry<float> _panelHeight;
         #endregion
 
         private const string DEFAULT_FONT = "AveriaSansLibre-Bold";
@@ -43,12 +50,19 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             _displayUnderMiniMap = Config.Bind("General", "Display under minimap", false, "Display under minimap");
             _displayDay = Config.Bind("General", "Display day", true, "Display day");
             _displayTime = Config.Bind("General", "Display time", true, "Display time");
-            _displayBackground = Config.Bind("General", "Display background", false, "Display background");
+            _displayBackground = Config.Bind("General", "Display background", true, "Display background");
             _twentyFourHourClock = Config.Bind("General", "24-hour clock", true, "24-hour clock");
             _fontSize = Config.Bind("General", "Font size", 16, "Font size");
             _fontName = Config.Bind("General", "Font name", DEFAULT_FONT, "Font name");
             _fontColor = Config.Bind("General", "Font color", new Color(1, 1, 1, 0.791f), "Font color");
+            _textOutlineEnabled = Config.Bind("General", "Text outline enabled", true, "Text outline enabled");
+            _textOutlineColor = Config.Bind("General", "Text outline color", Color.black, "Text outline color");
             _backgroundColor = Config.Bind("General", "Background color", new Color(0, 0, 0, 0.3921569f), "Background color");
+            _marginBetweenMiniMap = Config.Bind("General", "Margin between minimap", 0f, "Margin between minimap");
+            _padding = Config.Bind("General", "Padding left and right", 10f, "Padding left and right from text.");
+            _reverseTextPositions = Config.Bind("General", "Reverse text positions", false, "If set to 'true', time will display to the left and day will display to the right.");
+            _panelWidth = Config.Bind("General", "Panel width", 200f, "Panel width");
+            _panelHeight = Config.Bind("General", "Panel height", 30f, "Panel height");
 
             //Apply patches
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), ID);
@@ -77,7 +91,8 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 			}
 
             var rect = _panel.GetComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(-140, _displayUnderMiniMap.Value ? -255 : -25);
+            rect.anchoredPosition = new Vector2(-140f, _displayUnderMiniMap.Value ? -255f - _marginBetweenMiniMap.Value : -25f + _marginBetweenMiniMap.Value);
+            rect.sizeDelta = new Vector2(_panelWidth.Value, _panelHeight.Value);
             var image = _panel.GetComponent<Image>();
             image.enabled = _displayBackground.Value;
             image.color = _backgroundColor.Value;
@@ -112,12 +127,17 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             var rect = _panel.AddComponent<RectTransform>();
             rect.anchorMin = new Vector2(1, 1);
             rect.anchorMax = new Vector2(1, 1);
-            rect.anchoredPosition = new Vector2(-140, _displayUnderMiniMap.Value ? -255 : - 25);
-            rect.sizeDelta = new Vector2(200, 30);
+            rect.anchoredPosition = new Vector2(-140f, _displayUnderMiniMap.Value ? -255f - _marginBetweenMiniMap.Value : - 25f + _marginBetweenMiniMap.Value);
+            rect.sizeDelta = new Vector2(_panelWidth.Value, _panelHeight.Value);
+
+            var sprites = Resources.FindObjectsOfTypeAll<Sprite>();
+            var sprite = sprites.FirstOrDefault(s => s.name == "InputFieldBackground");
 
             var image = _panel.AddComponent<Image>();
             image.enabled = _displayBackground.Value;
             image.color = _backgroundColor.Value;
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
 
             Log("Panel created!");
 
@@ -140,22 +160,22 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             day.transform.SetParent(_panel.transform);
 
             var rect = day.AddComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(-46, 0);
-            rect.sizeDelta = new Vector2(90, 30);
-            
+            rect.anchoredPosition = new Vector2(_reverseTextPositions.Value ? (_panelWidth.Value / 4) - _padding.Value : -(_panelWidth.Value / 4) + _padding.Value, 0);
+            rect.sizeDelta = new Vector2(_panelWidth.Value / 2, _panelHeight.Value);
+
             _dayText = day.AddComponent<Text>();
             _dayText.color = _fontColor.Value;
             _dayText.font = GetFont();
             _dayText.fontSize = _fontSize.Value;
             _dayText.enabled = _displayDay.Value;
-            _dayText.alignment = TextAnchor.MiddleLeft;
+            _dayText.alignment = _reverseTextPositions.Value ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;
 
             var outline = day.AddComponent<Outline>();
-            outline.effectColor = Color.black;
+            outline.effectColor = _textOutlineColor.Value;
             outline.effectDistance = new Vector2(1, -1);
             outline.useGraphicAlpha = true;
             outline.useGUILayout = true;
-            outline.enabled = true;
+            outline.enabled = _textOutlineEnabled.Value;
 
             Log("Day created!");
         }
@@ -176,29 +196,29 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             time.transform.SetParent(_panel.transform);
 
             var rect = time.AddComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(46, 0);
-            rect.sizeDelta = new Vector2(90, 30);
+            rect.anchoredPosition = new Vector2(_reverseTextPositions.Value ? -(_panelWidth.Value / 4) + _padding.Value : (_panelWidth.Value / 4) - _padding.Value, 0);
+            rect.sizeDelta = new Vector2(_panelWidth.Value / 2, _panelHeight.Value);
 
             _timeText = time.AddComponent<Text>();
             _timeText.color = _fontColor.Value;
             _timeText.font = GetFont();
             _timeText.fontSize = _fontSize.Value;
             _timeText.enabled = _displayTime.Value;
-            _timeText.alignment = TextAnchor.MiddleRight;
+            _timeText.alignment = _reverseTextPositions.Value ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight;
 
             var outline = time.AddComponent<Outline>();
-            outline.effectColor = Color.black;
+            outline.effectColor = _textOutlineColor.Value;
             outline.effectDistance = new Vector2(1, -1);
             outline.useGraphicAlpha = true;
             outline.useGUILayout = true;
-            outline.enabled = true;
+            outline.enabled = _textOutlineEnabled.Value;
 
             Log("Time created!");
         }
 
         /// <summary>
         /// Updates text component with the current day.
-        /// It also updates the configured font, font size and color
+        /// It also updates the configured font, font size, color, outline, alignment and position.
         /// </summary>
         private void UpdateDay()
 		{
@@ -206,14 +226,23 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             {
                 _dayText.font = GetFont();
             }
+            var rect = _dayText.GetComponent<RectTransform>();
+            rect.anchoredPosition = new Vector2(_reverseTextPositions.Value ? (_panelWidth.Value / 4) - _padding.Value : -(_panelWidth.Value / 4) + _padding.Value, 0);
+            rect.sizeDelta = new Vector2(_panelWidth.Value / 2, _panelHeight.Value);
+
+            _dayText.alignment = _reverseTextPositions.Value ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;
             _dayText.color = _fontColor.Value;
             _dayText.fontSize = _fontSize.Value;
             _dayText.text = GetCurrentDayText();
-		}
+
+            var outline = _dayText.GetComponent<Outline>();
+            outline.enabled = _textOutlineEnabled.Value;
+            outline.effectColor = _textOutlineColor.Value;
+        }
 
         /// <summary>
         /// Updates text component with the current time.
-        /// It also updates the configured font, font size and color
+        /// It also updates the configured font, font size, color, outline, alignment and position.
         /// </summary>
         private void UpdateTime()
         {
@@ -221,10 +250,18 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 			{
                 _timeText.font = GetFont();
             }
+            var rect = _timeText.GetComponent<RectTransform>();
+            rect.anchoredPosition = new Vector2(_reverseTextPositions.Value ? -(_panelWidth.Value / 4) + _padding.Value : (_panelWidth.Value / 4) - _padding.Value, 0);
+            rect.sizeDelta = new Vector2(_panelWidth.Value / 2, _panelHeight.Value);
+            _timeText.alignment = _reverseTextPositions.Value ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight;
             _timeText.color = _fontColor.Value;
             _timeText.fontSize = _fontSize.Value;
             _timeText.text = GetCurrentTimeText();
-		}
+
+            var outline = _timeText.GetComponent<Outline>();
+            outline.enabled = _textOutlineEnabled.Value;
+            outline.effectColor = _textOutlineColor.Value;
+        }
 
         /// <summary>
         /// Get the current day.
@@ -271,6 +308,7 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
 
             var font = fonts.FirstOrDefault(f => f.name == _fontName.Value);
 
+            //If font not found take the default font.
             if (font == null)
             {
                 return fonts.FirstOrDefault(f => f.name == DEFAULT_FONT);
