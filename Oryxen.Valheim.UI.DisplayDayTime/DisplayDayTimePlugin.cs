@@ -58,7 +58,7 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
             _textOutlineEnabled = Config.Bind("General", "Text outline enabled", true, "Text outline enabled");
             _textOutlineColor = Config.Bind("General", "Text outline color", Color.black, "Text outline color");
             _backgroundColor = Config.Bind("General", "Background color", new Color(0, 0, 0, 0.3921569f), "Background color");
-            _marginBetweenMiniMap = Config.Bind("General", "Margin between minimap", 0f, "Margin between minimap");
+            _marginBetweenMiniMap = Config.Bind("General", "Margin between minimap and this panel", 0f, "Margin between minimap and this panel");
             _padding = Config.Bind("General", "Padding left and right", 10f, "Padding left and right from text.");
             _reverseTextPositions = Config.Bind("General", "Reverse text positions", false, "If set to 'true', time will display to the left and day will display to the right.");
             _panelWidth = Config.Bind("General", "Panel width", 200f, "Panel width");
