@@ -36,11 +36,18 @@ Configuration settings you can change:
 2. Display time: set to "true" as default.
 3. Display day: set to "true" as default.
 4. 24-hour clock: set to "true" as default (if set to false, it will display the time in 12-hour notation).
-5. Display background: set to "false" as default.
+5. Display background: set to "true" as default.
 6. Font name: set "AveriaSansLibre-Bold" as default.
 7. Font size: set to 16 as default.
 8. Font color: set to RGBA(1, 1, 1, 0.791) as default.
 9. Background color: set to RGBA(0, 0, 0, 0.3921569) as default.
+10. Text outline color: set to black as default.
+11. Text outline enabled: to to "true" as default.
+12. Margin between minimap and this panel: set to 0 as default.
+13. Padding left and right between text and border: set to 10 as default.
+14. Reverse text position: set to "false" as default, if set to "true", time will display to the left and day will display to the right.
+15. Panel width: set to 200 as default.
+16. Panel height: set to 30 as default.
 
 ## Links
 
