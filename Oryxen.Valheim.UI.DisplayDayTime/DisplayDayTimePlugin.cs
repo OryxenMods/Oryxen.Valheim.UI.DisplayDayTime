@@ -105,7 +105,7 @@ namespace Oryxen.Valheim.UI.DisplayDayTime
                 UpdateDay();
 			}
 
-            if (_displayDay.Value)
+            if (_displayTime.Value)
             {
                 UpdateTime();
             }
